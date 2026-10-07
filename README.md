@@ -1,48 +1,50 @@
 # Personal scripts
 
-This repository contains a collection of scripts I made for fun, to learn, and to automate small tasks in my environment. They are simple, practical pieces designed for personal use and experimentation with ideas that are useful in everyday work.
+This repository is a small personal toolbox of shell scripts for Linux system setup, automation experiments, and quick utilities. The goal is to keep simple helpers for day-to-day tasks, learning, and local experimentation without turning them into a formal project.
 
-They are not meant to be a commercial project or a universal solution. Some are tailored to my setup, while others are small utilities, experiments, or automations that I keep as quick references.
+These scripts are not meant to be universal or production-grade by default. Most are tailored to a specific machine or Debian-based environment and should be reviewed before execution.
 
-## What's here
+## What is in this repository
 
-- Debian system setup and maintenance
-- Docker installation on Debian 13
-- Terminal animations for progress and status feedback in scripts
-- Discord update automation helper with timer/service setup
-- KDE Plasma GUI restart helper
-- Personal folders for experiments and task-oriented work with OpenCode and Telegram
+- Debian 13 setup scripts for a new server or VM
+- Docker installation helper for Debian 13
+- Hardware inspection script for IOMMU groups
+- Terminal animation previews and apt-install examples
+- Discord update automation with systemd timer/service files
+- KDE Plasma restart helper
+- OpenCode workflow helper for quick Discord notifications
+- Telegram bot utility to inspect chat IDs from recent updates
 
 ## Repository structure
 
 ```text
 .
 ├── Linux/
-│   └── Debian/
-│       ├── debian13-setup.sh
-│       ├── install-docker-debian13.sh
-│       ├── README.md
-│       ├── Animations/
-│       │   ├── README.md
-│       │   ├── spinner.sh
-│       │   ├── ellipsis.sh
-│       │   ├── loading.sh
-│       │   ├── progress-bar.sh
-│       │   ├── pulse.sh
-│       │   └── Examples/
-│       │       ├── apt-install-spinner.sh
-│       │       ├── apt-install-ellipsis.sh
-│       │       ├── apt-install-loading.sh
-│       │       ├── apt-install-pulse.sh
-│       │       └── apt-install-progress-bar.sh
-│       ├── Discord/
-│       │   ├── README.md
-│       │   ├── discord-update.sh
-│       │   ├── discord-update.service
-│       │   ├── discord-update.timer
-│       │   └── install.sh
-│       └── Kde/
-│           └── plasma-restart.sh
+│   ├── Debian/
+│   │   ├── debian13-setup.sh
+│   │   ├── install-docker-debian13.sh
+│   │   ├── Animations/
+│   │   │   ├── README.md
+│   │   │   ├── spinner.sh
+│   │   │   ├── ellipsis.sh
+│   │   │   ├── loading.sh
+│   │   │   ├── progress-bar.sh
+│   │   │   ├── pulse.sh
+│   │   │   └── Examples/
+│   │   │       ├── apt-install-spinner.sh
+│   │   │       ├── apt-install-ellipsis.sh
+│   │   │       ├── apt-install-loading.sh
+│   │   │       ├── apt-install-pulse.sh
+│   │   │       └── apt-install-progress-bar.sh
+│   │   ├── Discord/
+│   │   │   ├── README.md
+│   │   │   ├── discord-update.sh
+│   │   │   ├── discord-update.service
+│   │   │   └── discord-update.timer
+│   │   └── Kde/
+│   │       └── plasma-restart.sh
+│   └── Hardware/
+│       └── iommu-groups.sh
 ├── OpenCode/
 │   ├── README.md
 │   └── workflow.sh
@@ -50,46 +52,113 @@ They are not meant to be a commercial project or a universal solution. Some are 
 │   ├── README.md
 │   └── telegram_get_chat_id.sh
 ├── README.md
-└── LICENSE (if added in the future)
+└── .git/
+```
+
+## Main scripts
+
+### Linux/Debian/debian13-setup.sh
+This script performs a basic Debian 13 server setup: updates the system, installs common administration tools, enables SSH, and adds the primary user to the sudo group.
+
+```bash
+sudo bash Linux/Debian/debian13-setup.sh
+```
+
+### Linux/Debian/install-docker-debian13.sh
+Installs Docker Engine and the Docker Compose plugin using the official Docker APT repository for Debian 13.
+
+```bash
+sudo bash Linux/Debian/install-docker-debian13.sh
+```
+
+### Linux/Hardware/iommu-groups.sh
+Lists all IOMMU groups and the PCI devices associated with them. Useful when preparing GPU or hardware passthrough setups.
+
+```bash
+bash Linux/Hardware/iommu-groups.sh
+```
+
+### Linux/Debian/Animations
+Contains standalone terminal animation previews and real apt examples. They are useful as UI feedback while a command is running.
+
+Examples:
+
+```bash
+bash Linux/Debian/Animations/spinner.sh
+bash Linux/Debian/Animations/progress-bar.sh
+sudo bash Linux/Debian/Animations/Examples/apt-install-spinner.sh
+```
+
+### Linux/Debian/Discord
+Helper for downloading the latest official Discord Debian package and installing it when a newer version is available.
+
+It includes:
+
+- `discord-update.sh`: checks the installed version and upgrades it if needed
+- `discord-update.service`: systemd one-shot service
+- `discord-update.timer`: scheduled daily run
+
+Update the path in the service file before enabling it:
+
+```ini
+[Service]
+Type=oneshot
+ExecStart=/path/to/discord-update.sh
+```
+
+Then install it with:
+
+```bash
+sudo cp Linux/Debian/Discord/discord-update.service /etc/systemd/system/
+sudo cp Linux/Debian/Discord/discord-update.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now discord-update.timer
+```
+
+### Linux/Debian/Kde/plasma-restart.sh
+Restarts the Plasma shell in the current KDE session.
+
+```bash
+bash Linux/Debian/Kde/plasma-restart.sh
+```
+
+### OpenCode/workflow.sh
+A lightweight Discord webhook utility used to post a completion message after a task is finished.
+
+```bash
+./OpenCode/workflow.sh "Finished the task and validated the changes."
+```
+
+Before using it, replace the placeholder webhook URL in the file with your own Discord webhook.
+
+### Telegram/telegram_get_chat_id.sh
+Queries the Telegram Bot API to list recent chat IDs the bot has seen.
+
+```bash
+./Telegram/telegram_get_chat_id.sh <BOT_TOKEN>
+```
+
+Or:
+
+```bash
+export TELEGRAM_BOT_TOKEN="123456:ABC..."
+./Telegram/telegram_get_chat_id.sh
 ```
 
 ## Recommended usage
 
-These scripts are meant to be reviewed before running them. Some require administrator privileges, internet access, or a specific system configuration.
+These scripts are meant to be inspected before running. Some require root privileges, internet access, or a very specific Linux environment.
 
 ```bash
-# example usage
 sudo bash Linux/Debian/debian13-setup.sh
 sudo bash Linux/Debian/install-docker-debian13.sh
+bash Linux/Hardware/iommu-groups.sh
 ```
 
 ## Important notes
 
-- Review each command before running it.
-- Some scripts are designed for Debian 13 and may depend on specific packages, users, or services.
-- I do not treat them as definitive production solutions without checking everything first.
-- The main goal is to practice, automate, and solve small tasks quickly.
-
-## Special folders
-
-### Linux/Debian
-Scripts for preparing the system and installing core software on Debian.
-
-### Linux/Debian/Animations
-Small terminal animation examples useful for giving visual feedback while a task is running.
-
-### Linux/Debian/Discord
-Helper scripts for checking and installing the latest Discord package automatically, with a systemd timer and service setup.
-
-### Linux/Debian/Kde
-Small utilities to restart the KDE Plasma graphical session when needed.
-
-### OpenCode
-A space for personal experiments, workflow notes, and small automation ideas I test for curiosity or practical use. This folder can change over time as scripts or notes are added or removed.
-
-### Telegram
-A folder for Telegram-related scripts and utilities I created for specific tasks or experiments, including chat ID lookup helpers.
-
-## Final note
-
-This repo is basically a personal toolbox: scripts I created for fun, for practical tasks, and to learn more about shell automation and Linux environments. If someone uses them, they should review and adapt them to their own use case before running anything.
+- Review every script before executing it.
+- Some commands are designed for Debian 13 and may assume a specific user, service, or package setup.
+- Scripts are intentionally simple and personal; they are not a complete production solution.
+- Never expose or commit Telegram bot tokens or other secrets to a public repository.
+- The Discord updater writes to `/var/log/update-discord.log` and should be checked before use on a system you do not control.
