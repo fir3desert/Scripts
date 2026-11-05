@@ -29,7 +29,9 @@ LINE_DOUBLE="  ═════════════════════�
 
 # State
 MARKER="$HOME/.gns3_setup_prompted"
-LOG="/tmp/setup_last_output"
+LOG="/tmp/gns3_setup_${USER}.log"   # per-user, so it never clashes with a root-owned file
+rm -f "$LOG" 2>/dev/null || true
+: > "$LOG" || { printf "  [ERROR] Cannot write log file %s\n" "$LOG" >&2; exit 1; }
 
 # Helpers
 header() {
