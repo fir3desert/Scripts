@@ -28,23 +28,22 @@ Designed for Debian-based systems, including Proxmox VE, using the `beep` utilit
 Update the package list and install `beep`:
 
 ```bash
-apt update
-apt install beep
+sudo apt update
+sudo apt install -y beep
 ```
 
-### 2. Create the melody script
+### 2. Install the melody script
 
-Create the script at `/usr/local/bin/ssh-melody`:
+This repository already contains the melody in [`ssh-melody.sh`](ssh-melody.sh). From the repository root, install it system-wide:
 
 ```bash
-vim /usr/local/bin/ssh-melody
+sudo install -m 0755 Linux/Debian/SSH-Melody/ssh-melody.sh /usr/local/bin/ssh-melody
 ```
 
-Add the following content:
+The script contains:
 
 ```bash
 #!/bin/bash
-
 beep -f 784 -l 130
 beep -f 988 -l 130
 beep -f 1175 -l 180
@@ -53,13 +52,7 @@ beep -f 1175 -l 130
 beep -f 1568 -l 300
 ```
 
-Save and close the file.
-
-Make it executable:
-
-```bash
-chmod +x /usr/local/bin/ssh-melody
-```
+You can edit `/usr/local/bin/ssh-melody` directly or change the file in this repository and reinstall it.
 
 ### 3. Test the melody
 
@@ -82,7 +75,7 @@ lsmod | grep pcspkr
 Edit the root user's Bash configuration:
 
 ```bash
-vim /root/.bashrc
+sudo vim /root/.bashrc
 ```
 
 Add the following lines at the end of the file:
@@ -110,9 +103,7 @@ ssh root@SERVER_IP
 
 Replace `SERVER_IP` with your server's IP address.
 
-The melody should play when the interactive SSH session starts.
-
-Keep your existing session open until you have verified that the new configuration works.
+The melody should play when the interactive SSH session starts. Keep your existing session open until you have verified that the new configuration works.
 
 ## Customization
 
@@ -125,9 +116,7 @@ beep -f 784 -l 130
 - `-f`: frequency in hertz (Hz). Higher values produce higher-pitched tones.
 - `-l`: duration in milliseconds.
 
-Change the frequencies and durations to create your own melody.
-
-For more information:
+Change the frequencies and durations to create your own melody. For more information:
 
 ```bash
 man beep
@@ -138,24 +127,22 @@ man beep
 Remove the SSH login configuration from `/root/.bashrc`:
 
 ```bash
-vim /root/.bashrc
+sudo vim /root/.bashrc
 ```
 
-Delete the `# Play a melody on interactive SSH login` block.
-
-Then remove the script:
+Delete the `# Play a melody on interactive SSH login` block. Then remove the script:
 
 ```bash
-rm /usr/local/bin/ssh-melody
+sudo rm /usr/local/bin/ssh-melody
 ```
 
 Optionally, remove the package if it is no longer needed:
 
 ```bash
-apt remove beep
+sudo apt remove beep
 ```
 
-## Tested Environment
+## Tested environment
 
 - Proxmox VE (Debian-based)
 - Bash
@@ -166,4 +153,4 @@ Hardware and kernel compatibility may vary between systems.
 
 ## License
 
-This project is released under the MIT License, unless otherwise specified by the repository owner.
+No separate license file is currently included in this repository. Check with the repository owner before reusing these scripts elsewhere.
