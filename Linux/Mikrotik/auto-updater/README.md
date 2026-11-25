@@ -45,20 +45,31 @@ Upload [`auto-update.rsc`](auto-update.rsc) to the router's file system and impo
 Or paste the equivalent command directly in the MikroTik Terminal, replacing `YOUR_DISCORD_WEBHOOK` with your webhook URL:
 
 ```routeros
-/system script add name=auto-update policy=read,write,policy,reboot,test source={
-    :global DC_Webhook
-    :set DC_Webhook "YOUR_DISCORD_WEBHOOK"
 
-    /system/package/update/set channel=stable
-    /system/package/update/check-for-updates once
+/system script add name=auto-update-discord policy=ftp,read,write,policy,reboot,test source={
+    :delay 1m
+
+    /system package update set channel=stable
+    /system package update check-for-updates once
     :delay 15s
 
-    :if ([/system/package/update get status] = "New version is available") do={
+    :local installed [/system package update get installed-version]
+    :local latest [/system package update get latest-version]
+    :local router [/system identity get name]
+    :local webhook "https://discord.com/api/webhooks/..."
 
-        /tool fetch url=$DC_Webhook http-method=post http-header-field="Content-Type: application/json" http-data="{\"content\":\"MikroTik: Update available! Installing and rebooting now.\"}" keep-result=no
+    :if ($installed != $latest) do={
+
+        :local payload ("{\"embeds\":[{\"title\":\"RouterOS Update\",\"color\":15105570,\"fields\":[{\"name\":\"Router\",\"value\":\"" . $router . "\",\"inline\":true},{\"name\":\"Old version\",\"value\":\"" . $installed . "\",\"inline\":true},{\"name\":\"New version\",\"value\":\"" . $latest . "\",\"inline\":true}],\"footer\":{\"text\":\"Installing update and rebooting\"}}]}")
+
+        /tool fetch url=$webhook http-method=post http-header-field="Content-Type: application/json" http-data=$payload keep-result=no
+
+        :log warning ("Updating RouterOS from " . $installed . " to " . $latest)
 
         :delay 5s
-        /system/package/update/install
+        /system package update install
+    } else={
+        :log info ("RouterOS is up to date: " . $installed)
     }
 }
 ```
