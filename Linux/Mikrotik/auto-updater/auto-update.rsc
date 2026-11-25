@@ -1,16 +1,31 @@
-/system script add name=auto-update policy=read,write,policy,reboot,test source={
-    :global DC_Webhook
-    :set DC_Webhook "YOUR_DISCORD_WEBHOOK"
 
-    /system/package/update/set channel=stable
-    /system/package/update/check-for-updates once
-    :delay 15s
+/system script add name=auto-update policy=ftp,read,write,policy,reboot,test source={
+    :local webhook "https://Webhook....."
 
-    :if ([/system/package/update get status] = "New version is available") do={
+    /system package update set channel=stable
 
-        /tool fetch url=$DC_Webhook http-method=post http-header-field="Content-Type: application/json" http-data="{\"content\":\"MikroTik: Update available! Installing and rebooting now.\"}" keep-result=no
+    :local update [/system package update check-for-updates as-value]
+
+    :local installed ($update->"installed-version")
+    :local latest ($update->"latest-version")
+
+    :log info ("Installed version: " . $installed)
+    :log info ("Latest version: " . $latest)
+
+    :if ($installed != $latest) do={
+
+        :local message ("MikroTik: Update available! Installed: " . $installed . " | Latest: " . $latest . ". Installing and rebooting.")
+
+        :local payload ("{\"content\":\"" . $message . "\"}")
+
+        /tool fetch url=$webhook http-method=post \
+            http-header-field="Content-Type: application/json" \
+            http-data=$payload output=none
 
         :delay 5s
-        /system/package/update/install
+
+        /system package update install
+    } else={
+        :log info "MikroTik is already up to date"
     }
 }
